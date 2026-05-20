@@ -1,0 +1,27 @@
+/* Murmur — Purple primary (Image 1 baseline), Sage accent only */
+
+:root {
+  --porcelain-white: #f7f9fa;
+  --bg-page: var(--porcelain-white);
+
+  --text-primary: #111029;
+  --text-muted: #6b6687;
+  --text-whisper: rgba(107, 102, 135, 0.55);
+
+  /* Primary — soothing purple / pearl */
+  --purple-soothing: #9b7ec8;
+  --purple-deep: #7c5cbf;
+  --purple-pearl: #d1c7f7;
+  --purple-glow: rgba(199, 188, 244, 0.32);
+  --purple-glow-strong: rgba(155, 126, 200, 0.45);
+
+  /* Accent only — sage micro-interactions */
+  --sage-accent: #a2b997;
+  --sage-accent-soft: rgba(162, 185, 151, 0.35);
+
+  --border-soft: #e8ecef;
+  --surface-card: #ffffff;
+
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}

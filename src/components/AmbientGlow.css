@@ -1,0 +1,89 @@
+.ambient-zone {
+  position: relative;
+  isolation: isolate;
+}
+
+.ambient-zone-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ambient-aurora {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.ambient-zone--orb {
+  padding: 2rem 1.5rem 1rem;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.ambient-zone--orb .ambient-aurora--a {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--purple-glow-strong) 0%, var(--purple-glow) 40%, transparent 68%);
+  animation: aurora-breathe 5s ease-in-out infinite;
+}
+
+.ambient-zone--orb .ambient-aurora--b {
+  width: 160px;
+  height: 160px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(209, 199, 247, 0.25) 0%, transparent 70%);
+  animation: aurora-breathe 5s ease-in-out infinite 1.2s;
+}
+
+.ambient-zone--input {
+  border-radius: 1.25rem;
+  padding: 0.35rem;
+}
+
+.ambient-zone--input .ambient-aurora--a {
+  inset: -8px -12px;
+  background: radial-gradient(ellipse 80% 70% at 50% 40%, var(--purple-glow) 0%, transparent 72%);
+  animation: aurora-breathe-input 6s ease-in-out infinite;
+}
+
+.ambient-zone--input .ambient-aurora--b {
+  inset: 4px;
+  background: radial-gradient(ellipse 90% 80% at 50% 100%, rgba(199, 188, 244, 0.12) 0%, transparent 75%);
+  animation: aurora-breathe-input 6s ease-in-out infinite 2s;
+  opacity: 0.75;
+}
+
+.ambient-zone--phase-processing .ambient-aurora--a {
+  opacity: 0.95;
+  animation-duration: 4s;
+}
+
+@keyframes aurora-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes aurora-breathe-input {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}

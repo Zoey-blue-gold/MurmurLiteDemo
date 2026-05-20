@@ -1,0 +1,116 @@
+.scenario-stack-wrap {
+  width: 100%;
+}
+
+.scenario-stack {
+  position: relative;
+  height: 112px;
+  margin: 0 auto;
+  max-width: 280px;
+}
+
+.scenario-card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 100%;
+  max-width: 260px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 1.125rem;
+  background: var(--surface-card);
+  box-shadow: 0 8px 32px rgba(155, 126, 200, 0.12);
+  cursor: grab;
+  font-family: inherit;
+  color: var(--text-primary);
+  will-change: transform, opacity;
+  touch-action: pan-y;
+}
+
+.scenario-card:active {
+  cursor: grabbing;
+}
+
+.scenario-card--front {
+  border-color: rgba(155, 126, 200, 0.35);
+  box-shadow:
+    0 12px 40px rgba(155, 126, 200, 0.2),
+    0 0 0 2px rgba(155, 126, 200, 0.15);
+}
+
+.scenario-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.scenario-card-label {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.scenario-stack-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.scenario-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-soft);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--purple-soothing);
+  cursor: pointer;
+  transition: background 0.25s var(--ease-fluid), box-shadow 0.25s var(--ease-fluid);
+}
+
+.scenario-nav-btn:hover {
+  background: #faf8ff;
+  box-shadow: 0 4px 16px var(--purple-glow);
+}
+
+.scenario-dots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.scenario-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(155, 126, 200, 0.25);
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-fluid), background 0.25s var(--ease-fluid);
+}
+
+.scenario-dot--active {
+  background: var(--purple-soothing);
+  transform: scale(1.35);
+  box-shadow: 0 0 8px var(--purple-glow-strong);
+}
+
+.scenario-swipe-hint {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-whisper);
+}

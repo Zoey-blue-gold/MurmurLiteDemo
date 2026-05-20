@@ -1,0 +1,19 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f7f9fa;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}

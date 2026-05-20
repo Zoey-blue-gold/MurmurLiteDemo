@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#F7F9FA" />
+  <title>Murmur AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            fredoka: ['Fredoka', 'sans-serif'],
+          },
+          transitionTimingFunction: { 'out-quint': 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        },
+      },
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 500; }
+
+    :root {
+      --porcelain: #F7F9FA;
+      --purple-glow: rgba(155,126,200,0.28);
+      --sage-glow: rgba(118,160,114,0.28);
+      --sage: #76A072;
+    }
+    .ambient-zone { position:relative; isolation:isolate; }
+    .ambient-aurora { position:absolute; border-radius:50%; pointer-events:none; will-change:transform,opacity; }
+    .ambient-zone--orb { padding:2rem 1.5rem 1rem; margin:0 auto; width:fit-content; }
+    .ambient-zone--orb .ambient-aurora--a { width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-50%); animation:aurora-breathe 5s ease-in-out infinite; }
+    .ambient-zone--orb .ambient-aurora--b { width:160px;height:160px;top:50%;left:50%;transform:translate(-50%,-50%); animation:aurora-breathe 5s ease-in-out infinite 1.2s; opacity:.7; }
+    .ambient-zone--phase-receptive .ambient-aurora--a { background:radial-gradient(circle,var(--purple-glow) 0%,transparent 68%); }
+    .ambient-zone--phase-rational .ambient-aurora--a { background:radial-gradient(circle,var(--sage-glow) 0%,transparent 68%); }
+    .ambient-zone--phase-processing .ambient-aurora--a { background:radial-gradient(circle,rgba(155,126,200,0.22) 0%,rgba(118,160,114,0.2) 50%,transparent 68%); }
+    @keyframes aurora-breathe { 0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.92)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)} }
+    .orb-stage[data-state="typing"] .orb-sphere { animation:orb-bob 2.4s ease-in-out infinite, orb-pulse var(--pulse-dur,2s) ease-in-out infinite; }
+    @keyframes orb-bob { 0%,100%{transform:translateY(0) scale(1.02)} 50%{transform:translateY(-4px) scale(1.03)} }
+    @keyframes orb-pulse { 0%,100%{box-shadow:0 0 36px rgba(155,126,200,.35)} 50%{box-shadow:0 0 52px rgba(155,126,200,.5)} }
+    .page-rational .header-dot { background:#76A072; box-shadow:0 0 8px 2px var(--sage-glow); }
+    .page-rational .scene-pill.active { outline-color:rgba(118,160,114,.45); box-shadow:0 8px 28px var(--sage-glow); }
+
+    .pill-scroll::-webkit-scrollbar { display: none; }
+    .pill-scroll { scrollbar-width: none; }
+
+    .header-dot { box-shadow: 0 0 8px 2px rgba(199,188,244,0.8); animation: dot-pulse 3s ease-in-out infinite; }
+    @keyframes dot-pulse { 0%,100%{opacity:.6;transform:scale(.9)} 50%{opacity:1;transform:scale(1.1)} }
+
+    /* ── Orb v0.3 ── */
+    .orb-stage { position:relative; width:120px; height:120px; display:flex; align-items:center; justify-content:center; perspective:500px; }
+    .orb-halo { position:absolute; inset:-24px; border-radius:50%; pointer-events:none; z-index:0; transition:background .5s ease, opacity .5s ease; }
+    .orb-mesh { position:absolute; inset:-22px; border-radius:50%; pointer-events:none; z-index:0; mask:radial-gradient(circle,black 30%,transparent 68%); -webkit-mask:radial-gradient(circle,black 30%,transparent 68%); }
+    .orb-sphere { position:relative; z-index:2; width:120px; height:120px; border-radius:50%;
+      background:radial-gradient(ellipse 80% 70% at 35% 28%,#fff 0%,#e8e0f8 35%,#c9b8e8 70%,#b3a4e3 100%);
+      box-shadow:0 0 40px 10px rgba(199,188,244,.5), inset 0 -12px 24px rgba(17,16,41,.12), inset 0 8px 16px rgba(255,255,255,.6);
+      display:flex; align-items:center; justify-content:center; overflow:hidden; transition:transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s ease; }
+    .orb-inner-glow { position:absolute; inset:12%; border-radius:50%; background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.7) 0%,transparent 55%); pointer-events:none; }
+    .orb-specular { position:absolute; top:14%; left:22%; width:28%; height:18%; border-radius:50%; background:rgba(255,255,255,.85); filter:blur(3px); pointer-events:none; }
+    .orb-face { position:relative; z-index:1; width:52px; height:20px; margin-top:6px; }
+
+    .orb-stage[data-state="idle"] .orb-halo { background:radial-gradient(circle,rgba(199,188,244,.65) 0%,rgba(199,188,244,.15) 55%,transparent 72%); animation:halo-idle 4s ease-in-out infinite; }
+    .orb-stage[data-state="idle"] .orb-sphere { animation:sphere-idle 4s ease-in-out infinite; }
+    @keyframes halo-idle { 0%,100%{opacity:.5;transform:scale(.96)} 50%{opacity:.85;transform:scale(1.06)} }
+    @keyframes sphere-idle { 0%,100%{transform:scale(.96)} 50%{transform:scale(1.04)} }
+
+    .orb-stage[data-state="typing"] .orb-halo { background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(199,188,244,.45) 40%,transparent 70%); transform:scale(1.1); }
+    .orb-stage[data-state="typing"] .orb-sphere { transform:translateY(6px) scale(1.02); box-shadow:0 0 55px 18px rgba(255,255,255,.55),0 0 40px 10px rgba(199,188,244,.45),inset 0 -10px 20px rgba(17,16,41,.08); }
+
+    .orb-stage[data-state="generating"] .orb-halo { background:conic-gradient(from 0deg,#c7bcf4,#c6d7c9,#c7bcf4,#c6d7c9,#c7bcf4); filter:blur(8px); animation:halo-spin 6s linear infinite; opacity:.75; }
+    .orb-stage[data-state="generating"] .orb-mesh { background:conic-gradient(from 0deg,rgba(199,188,244,.5),rgba(198,215,201,.5),rgba(199,188,244,.5)); animation:mesh-spin 6s linear infinite; display:block; }
+    .orb-stage[data-state="generating"] .orb-sphere { animation:sphere-fast 2s ease-in-out infinite; }
+    @keyframes halo-spin { to{transform:rotate(360deg) scale(1.05)} }
+    @keyframes mesh-spin { to{transform:rotate(360deg)} }
+    @keyframes sphere-fast { 0%,100%{transform:scale(.98)} 50%{transform:scale(1.02)} }
+    .orb-mesh { display:none; }
+
+    .orb-stage[data-state="complete"] .orb-halo { animation:halo-burst .7s cubic-bezier(.34,1.56,.64,1) forwards; background:radial-gradient(circle,rgba(199,188,244,.8) 0%,rgba(198,215,201,.3) 50%,transparent 72%); }
+    .orb-stage[data-state="complete"] .orb-sphere { animation:sphere-spring .7s cubic-bezier(.34,1.56,.64,1) forwards; }
+    @keyframes halo-burst { 0%{transform:scale(.9);opacity:.5} 40%{transform:scale(1.35);opacity:1} 100%{transform:scale(1.05);opacity:.75} }
+    @keyframes sphere-spring { 0%{transform:scale(.92)} 45%{transform:scale(1.1)} 70%{transform:scale(.97)} 100%{transform:scale(1)} }
+
+    .orb-ripples { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:0; }
+    .orb-ripple { position:absolute; width:120px; height:120px; border-radius:50%; border:2px solid rgba(199,188,244,.5); animation:ripple-out .8s ease-out forwards; }
+    .orb-ripple:nth-child(2){animation-delay:.12s} .orb-ripple:nth-child(3){animation-delay:.24s}
+    @keyframes ripple-out { 0%{transform:scale(.7);opacity:.8} 100%{transform:scale(2.4);opacity:0} }
+    .orb-stage[data-state="dispatched"] .orb-sphere { animation:sphere-pop .8s cubic-bezier(.34,1.4,.64,1) forwards; }
+    @keyframes sphere-pop { 0%{transform:scale(1)} 35%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+    .result-card { opacity:0; transform:translateY(16px); animation:card-in .55s cubic-bezier(.22,1,.36,1) forwards; }
+    .result-card:nth-child(1){animation-delay:.05s} .result-card:nth-child(2){animation-delay:.15s} .result-card:nth-child(3){animation-delay:.25s}
+    @keyframes card-in { to{opacity:1;transform:translateY(0)} }
+
+    .copy-btn.copied [data-lucide="copy"] { display:none; }
+    .copy-btn.copied .copy-check { display:block; }
+    .copy-check { display:none; }
+
+    .btn-generate:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 12px 28px rgba(17,16,41,.18); }
+    .ethereal-ph::placeholder { color: rgba(180,174,206,0.6); }
+  </style>
+</head>
+<body id="page" class="min-h-screen text-[#111029] antialiased font-sans font-medium" style="background:#F7F9FA">
+
+  <main class="mx-auto max-w-md min-h-screen px-5 pb-16 pt-10">
+    <header class="flex items-center justify-center gap-2 mb-2">
+      <span class="header-dot w-2 h-2 rounded-full bg-[#C7BCF4]"></span>
+      <span class="text-[16px] font-semibold tracking-[0.15em]">Murmur</span>
+    </header>
+
+    <section class="flex flex-col items-center py-6">
+      <div id="ambient-orb" class="ambient-zone ambient-zone--orb ambient-zone--phase-receptive">
+        <div class="ambient-aurora ambient-aurora--a"></div>
+        <div class="ambient-aurora ambient-aurora--b"></div>
+      <div id="orb-stage" class="orb-stage relative z-10" data-state="idle" style="--pulse-dur:2s">
+        <div id="orb-ripples" class="orb-ripples hidden" aria-hidden="true">
+          <span class="orb-ripple"></span><span class="orb-ripple"></span><span class="orb-ripple"></span>
+        </div>
+        <div class="orb-halo"></div>
+        <div class="orb-mesh"></div>
+        <div class="orb-sphere">
+          <div class="orb-inner-glow"></div>
+          <div class="orb-specular"></div>
+          <svg id="orb-face" class="orb-face" viewBox="0 0 52 20" aria-hidden="true"></svg>
+        </div>
+      </div>
+      </div>
+      <p class="mt-4 text-[15px] font-semibold text-[#6B6687] text-center leading-relaxed max-w-[300px]">
+        说清楚你的感受，我们一起把它理成得体的话。
+      </p>
+    </section>
+
+    <section class="mb-5 space-y-4">
+      <div>
+        <p class="text-[13px] font-semibold text-[#6B6687] mb-2.5">I want to talk to...</p>
+        <div class="pill-scroll flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1" id="scene-pills"></div>
+      </div>
+      <div>
+        <p class="text-[13px] font-semibold text-[#6B6687] mb-2.5">My goal is to...</p>
+        <div class="flex flex-wrap gap-2" id="goal-tags"></div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <div class="rounded-2xl border border-[#E2DDF0] bg-white/80 backdrop-blur-md p-4 transition-all duration-300 ease-out-quint focus-within:border-[#B3A4E3] focus-within:shadow-[inset_0_0_0_1px_rgba(179,164,227,0.25),0_8px_24px_rgba(123,107,168,0.06)]">
+        <textarea id="input" rows="4" placeholder="e.g., My friend asked me to grab coffee this weekend, but I really just need some alone time to recharge..."
+          class="ethereal-ph w-full min-h-[120px] resize-none bg-transparent text-[15px] font-medium leading-relaxed outline-none placeholder:font-normal"></textarea>
+        <button id="generate-btn" type="button" disabled
+          class="btn-generate mt-3 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#111029] text-white text-[15px] font-semibold transition-all duration-300 ease-out-quint disabled:opacity-35 disabled:cursor-not-allowed">
+          <span id="btn-label">Craft my words</span><span class="text-lg leading-none">→</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="results" class="hidden space-y-3"></section>
+
+    <div id="modal" class="hidden fixed inset-0 z-50 flex items-end justify-center p-5">
+      <div class="absolute inset-0 bg-[#111029]/20 backdrop-blur-[2px]" id="modal-overlay"></div>
+      <div class="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-[0_20px_50px_rgba(123,107,168,0.15)]">
+        <p class="text-center text-[17px] font-bold mb-5">Did you send it?</p>
+        <div class="flex flex-col gap-2.5">
+          <button id="modal-sent" type="button" class="py-3 rounded-xl bg-[#428564] text-white text-[15px] font-semibold">Sent ✓</button>
+          <button id="modal-not" type="button" class="py-3 rounded-xl border border-[#E2DDF0] font-medium">Not yet</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ORB = { IDLE:'idle', TYPING:'typing', GENERATING:'generating', COMPLETE:'complete', DISPATCHED:'dispatched' };
+    const STROKE = '#7A6FA6';
+
+    const SCENES = [
+      { id:'family', icon:'home', label:'家庭关系', tint:'#FBF7F2', color:'#8A7D6E' },
+      { id:'authority', icon:'building-2', label:'职场/权威', subtitle:'面对领导、导师、长辈等具备评价权的角色', tint:'#F2F4F8', color:'#5C6B82', wide:true },
+      { id:'friend', icon:'message-circle', label:'朋友', tint:'#F2F7F4', color:'#5A7A65' },
+      { id:'crush', icon:'heart', label:'在意的人', tint:'#FBF2F5', color:'#9E6B7A' },
+      { id:'stranger', icon:'user-circle', label:'陌生人', tint:'#F5F3FA', color:'#7A6F8E' },
+    ];
+    const GOALS = [
+      { id:'no', label:'Say No' }, { id:'reply', label:'Reply' },
+      { id:'initiate', label:'Initiate' }, { id:'stuck', label:"I'm Stuck" },
+    ];
+    const RESULT_META = [
+      { key:'safe', badge:'Safe Version', badgeClass:'bg-[#EEF4FF] text-[#4A72B2]', icon:'shield' },
+      { key:'balanced', badge:'Balanced Version', badgeClass:'bg-[#EDF7F2] text-[#428564]', icon:'scale' },
+      { key:'direct', badge:'Direct Version', badgeClass:'bg-[#FFF6ED] text-[#B26A3A]', icon:'zap' },
+    ];
+
+    let scene='', goal='', loading=false, orbComplete=false, orbDispatched=false, inputFocused=false, hasResults=false;
+    const page = document.getElementById('page');
+    const ambientOrb = document.getElementById('ambient-orb');
+
+    const orbStage = document.getElementById('orb-stage');
+    const orbFace = document.getElementById('orb-face');
+    const orbRipples = document.getElementById('orb-ripples');
+    const input = document.getElementById('input');
+    const generateBtn = document.getElementById('generate-btn');
+    const btnLabel = document.getElementById('btn-label');
+    const resultsEl = document.getElementById('results');
+    const modal = document.getElementById('modal');
+
+    function mockGenerateAIResponse(userInput) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            safe: "I'd love to catch up another time, but I'm completely wiped out this weekend and need to take it easy. Hope you have a great time though!",
+            balanced: "Thanks for inviting me! I'm actually feeling pretty low on energy this weekend, so I think I'm going to stay in and recharge. Let's definitely reschedule soon.",
+            direct: "I won't be able to make it this weekend. I'm really exhausted and need some quiet time to rest, but let's do something another day!",
+          });
+        }, 2000);
+      });
+    }
+
+    const FACES = {
+      idle: `<circle cx="14" cy="10" r="3.2" fill="${STROKE}" opacity="0.82"/><circle cx="38" cy="10" r="3.2" fill="${STROKE}" opacity="0.82"/><circle cx="13" cy="9" r="0.9" fill="#fff" opacity="0.45"/><circle cx="37" cy="9" r="0.9" fill="#fff" opacity="0.45"/>`,
+      typing: `<circle cx="14" cy="10" r="3.2" fill="${STROKE}" opacity="0.82"/><circle cx="38" cy="10" r="3.2" fill="${STROKE}" opacity="0.82"/><circle cx="13" cy="9" r="0.9" fill="#fff" opacity="0.45"/><circle cx="37" cy="9" r="0.9" fill="#fff" opacity="0.45"/>`,
+      generating: `<circle cx="14" cy="10" r="3" fill="${STROKE}" opacity="0.75"/><path d="M28 10 Q32 9 36 10" stroke="${STROKE}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/>`,
+      complete: `<path d="M8 11 Q14 7 20 11" stroke="${STROKE}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/><path d="M32 11 Q38 7 44 11" stroke="${STROKE}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/>`,
+      dispatched: (() => { const s=(cx,cy)=>`M${cx} ${cy-3} L${cx+.9} ${cy-.7} L${cx+3} ${cy-.7} L${cx+1.2} ${cy+1} L${cx+1.8} ${cy+3.2} L${cx} ${cy+1.8} L${cx-1.8} ${cy+3.2} L${cx-1.2} ${cy+1} L${cx-3} ${cy-.7} L${cx-.9} ${cy-.7} Z`; return `<path d="${s(14,10)}" fill="${STROKE}" opacity="0.9"/><path d="${s(38,10)}" fill="${STROKE}" opacity="0.9"/>`; })(),
+    };
+
+    function resolveOrbState() {
+      if (orbDispatched) return ORB.DISPATCHED;
+      if (loading) return ORB.GENERATING;
+      if (orbComplete) return ORB.COMPLETE;
+      if (input.value.trim() || inputFocused) return ORB.TYPING;
+      return ORB.IDLE;
+    }
+
+    function getUiPhase() {
+      if (hasResults) return 'rational';
+      if (loading) return 'processing';
+      return 'receptive';
+    }
+
+    function applyUiPhase() {
+      const p = getUiPhase();
+      ambientOrb.className = `ambient-zone ambient-zone--orb ambient-zone--phase-${p} relative z-0`;
+      page.classList.toggle('page-rational', p === 'rational');
+    }
+
+    function applyOrbState() {
+      const s = resolveOrbState();
+      orbStage.dataset.state = s;
+      const len = input.value.trim().length;
+      orbStage.style.setProperty('--pulse-dur', `${Math.max(1.2, 2.8 - Math.min(len/120,1)*1.6)}s`);
+      orbFace.innerHTML = FACES[s] || FACES.idle;
+      applyUiPhase();
+      orbRipples.classList.toggle('hidden', s !== ORB.DISPATCHED);
+      if (s === ORB.DISPATCHED) {
+        orbRipples.querySelectorAll('.orb-ripple').forEach((el) => {
+          el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+        });
+      }
+    }
+
+    function updateBtn() {
+      generateBtn.disabled = !(scene && goal && input.value.trim()) || loading;
+    }
+
+    const sceneEl = document.getElementById('scene-pills');
+    SCENES.forEach((s) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.scene = s.id;
+      btn.className = `scene-pill shrink-0 flex items-center gap-2.5 pl-1.5 pr-4 py-2 rounded-2xl bg-white border border-[#E8ECEF] shadow-[0_4px_20px_rgba(13,23,71,0.03)] transition-all duration-300 ease-out-quint text-[14px] font-bold${s.wide?' max-w-[280px]':''}`;
+      btn.innerHTML = `<span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:${s.tint}"><i data-lucide="${s.icon}" class="w-[18px] h-[18px]" style="color:${s.color}"></i></span><span class="flex flex-col items-start text-left">${s.subtitle?`<span class="font-bold leading-tight">${s.label}</span><span class="text-[11px] font-medium text-[#6B6687]/55 max-w-[200px] leading-snug">${s.subtitle}</span>`:`<span class="font-bold">${s.label}</span>`}</span>`;
+      btn.addEventListener('click', () => {
+        scene = s.id;
+        sceneEl.querySelectorAll('.scene-pill').forEach((p) => {
+          const on = p === btn;
+          p.classList.toggle('active', on);
+          p.classList.toggle('scale-[1.03]', on);
+          p.classList.toggle('ring-2', on);
+          p.classList.toggle('ring-[#9B7EC8]/40', on);
+          p.classList.toggle('shadow-[0_8px_28px_rgba(155,126,200,0.18)]', on);
+        });
+        updateBtn();
+      });
+      sceneEl.appendChild(btn);
+    });
+
+    const goalEl = document.getElementById('goal-tags');
+    GOALS.forEach((g) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.goal = g.id;
+      btn.className = 'goal-tag font-fredoka px-3.5 py-2 rounded-xl text-[13px] font-medium border border-[#E2DDF0] bg-white/70 text-[#6B6687] transition-all duration-300 ease-out-quint';
+      btn.textContent = g.label;
+      btn.addEventListener('click', () => {
+        goal = g.id;
+        goalEl.querySelectorAll('.goal-tag').forEach((t) => {
+          const on = t === btn;
+          t.classList.toggle('bg-[#111029]', on);
+          t.classList.toggle('text-white', on);
+          t.classList.toggle('border-[#111029]', on);
+          t.classList.toggle('text-[#6B6687]', !on);
+          t.classList.toggle('bg-white/70', !on);
+          t.classList.toggle('border-[#E2DDF0]', !on);
+        });
+        updateBtn();
+      });
+      goalEl.appendChild(btn);
+    });
+
+    input.addEventListener('input', () => { updateBtn(); applyOrbState(); });
+    input.addEventListener('focus', () => { inputFocused = true; applyOrbState(); });
+    input.addEventListener('blur', () => { inputFocused = false; applyOrbState(); });
+
+    function renderResults(data) {
+      resultsEl.innerHTML = RESULT_META.map((m, i) => `
+        <article class="result-card bg-white rounded-2xl p-5 shadow-[0_10px_30px_rgba(123,107,168,0.05)]">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <span class="font-fredoka inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-semibold ${m.badgeClass}">
+              <i data-lucide="${m.icon}" class="w-3 h-3"></i>${m.badge}
+            </span>
+            <button type="button" class="copy-btn flex items-center justify-center w-9 h-9 rounded-xl text-[#6B6687] hover:bg-[#F5F3FF] transition-all duration-300" data-idx="${i}">
+              <i data-lucide="copy" class="w-4 h-4"></i><span class="copy-check text-[#428564] font-bold">✓</span>
+            </button>
+          </div>
+          <p class="text-[15px] font-medium leading-relaxed">${data[m.key]}</p>
+        </article>`).join('');
+      resultsEl.classList.remove('hidden');
+      lucide.createIcons();
+      resultsEl.querySelectorAll('.copy-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const idx = +btn.dataset.idx;
+          const key = RESULT_META[idx].key;
+          try { await navigator.clipboard.writeText(data[key]); } catch(_) {}
+          btn.classList.add('copied');
+          modal.classList.remove('hidden');
+        });
+      });
+    }
+
+    generateBtn.addEventListener('click', async () => {
+      if (generateBtn.disabled) return;
+      loading = true;
+      orbComplete = false;
+      applyOrbState();
+      btnLabel.textContent = 'Listening...';
+      generateBtn.disabled = true;
+      resultsEl.classList.add('hidden');
+      const data = await mockGenerateAIResponse(input.value);
+      loading = false;
+      hasResults = true;
+      orbComplete = true;
+      applyOrbState();
+      setTimeout(() => { orbComplete = false; applyOrbState(); }, 1400);
+      btnLabel.textContent = 'Craft my words';
+      updateBtn();
+      renderResults(data);
+      resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    document.getElementById('modal-overlay').onclick = () => modal.classList.add('hidden');
+    document.getElementById('modal-not').onclick = () => modal.classList.add('hidden');
+    document.getElementById('modal-sent').onclick = () => {
+      modal.classList.add('hidden');
+      orbDispatched = true;
+      applyOrbState();
+      setTimeout(() => { orbDispatched = false; applyOrbState(); }, 800);
+    };
+
+    applyOrbState();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
