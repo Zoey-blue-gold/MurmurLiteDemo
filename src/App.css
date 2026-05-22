@@ -347,3 +347,22 @@
 .modal-btn--ghost:hover {
   background: var(--bg-page);
 }
+.result-content {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-top: 10px;
+  color: #111;
+}
+
+.result-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 12px 0;
+}
+
+.result-explanation {
+  font-size: 12px;
+  color: #8b5cf6; /* 紫色 */
+  line-height: 1.4;
+  opacity: 0.9;
+}

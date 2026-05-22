@@ -15,6 +15,7 @@ const BADGE_ICONS = {
 };
 
 function App() {
+  console.log("🔥 APP RENDERING");
   const [scene, setScene] = useState(SCENES[0].id);
   const [goal, setGoal] = useState('');
   const [input, setInput] = useState('');
@@ -49,17 +50,20 @@ function App() {
   }, [orbDispatched, loading, orbComplete, isTyping, inputFocused]);
 
   const handleGenerate = async () => {
-    if (!canGenerate || loading) return;
-    setLoading(true);
-    setResults(null);
-    setCopiedIdx(null);
-    try {
-      const data = await mockGenerate({ input: input.trim() });
-      setResults(data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  console.log("🔥 CLICK GENERATE BUTTON");
+
+  if (!canGenerate || loading) return;
+  setLoading(true);
+  setResults(null);
+  setCopiedIdx(null);
+
+  try {
+    const data = await mockGenerate({ input: input.trim() });
+    setResults(data);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCopy = useCallback(async (text, idx) => {
     try {
@@ -146,38 +150,56 @@ function App() {
         </section>
 
         {results && (
-          <section className="results-section">
-            <p className="results-intro">{COPY.resultsIntro}</p>
-            {results.map((card, idx) => {
-              const badge = BADGE_META[card.tag] ?? BADGE_META['安全版'];
-              const BadgeIcon = BADGE_ICONS[card.tag] ?? Shield;
-              const isCopied = copiedIdx === idx;
-              return (
-                <article
-                  key={card.tag}
-                  className="result-card"
-                  style={{ animationDelay: `${0.05 + idx * 0.1}s` }}
-                >
-                  <div className="result-card-top">
-                    <span className={`result-badge ${badge.className}`}>
-                      <BadgeIcon size={12} strokeWidth={2.5} />
-                      {badge.label}
-                    </span>
-                    <button
-                      type="button"
-                      className={`copy-icon-btn${isCopied ? ' copy-icon-btn--done' : ''}`}
-                      onClick={() => handleCopy(card.content, idx)}
-                      aria-label="复制"
-                    >
-                      {isCopied ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} strokeWidth={2} />}
-                    </button>
-                  </div>
-                  <p className="result-text">{card.content}</p>
-                </article>
-              );
-            })}
-          </section>
-        )}
+  <section className="results-section">
+    <p className="results-intro">{COPY.resultsIntro}</p>
+
+    {results.map((card, idx) => {
+      const badge = BADGE_META[card.tag] ?? BADGE_META["安全版"];
+      const BadgeIcon = BADGE_ICONS[card.tag] ?? Shield;
+      const isCopied = copiedIdx === idx;
+
+      return (
+        <article
+          key={card.tag}
+          className="result-card"
+          style={{ animationDelay: `${0.05 + idx * 0.1}s` }}
+        >
+          <div className="result-card-top">
+            <span className={`result-badge ${badge.className}`}>
+              <BadgeIcon size={12} strokeWidth={2.5} />
+              {badge.label}
+            </span>
+
+            <button
+              type="button"
+              className={`copy-icon-btn${
+                isCopied ? " copy-icon-btn--done" : ""
+              }`}
+              onClick={() => handleCopy(card.content, idx)}
+              aria-label="复制"
+            >
+              {isCopied ? (
+                <Check size={16} strokeWidth={2.5} />
+              ) : (
+                <Copy size={16} strokeWidth={2} />
+              )}
+            </button>
+          </div>
+
+          <p className="result-text">
+            {card.content}
+          </p>
+
+          {card.explanation && (
+            <p className="result-explanation">
+              {card.explanation}
+            </p>
+          )}
+        </article>
+      );
+    })}
+  </section>
+)}
 
         {showModal && (
           <div className="modal-root" role="dialog" aria-modal="true">
