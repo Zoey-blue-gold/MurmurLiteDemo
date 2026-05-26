@@ -17,7 +17,7 @@ const BADGE_ICONS = {
 function App() {
   console.log("🔥 APP RENDERING");
   const [scene, setScene] = useState(SCENES[0].id);
-  const [goal, setGoal] = useState('');
+  const [goal, setGoal] = useState(GOALS[0].id);
   const [input, setInput] = useState('');
   const [inputFocused, setInputFocused] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ function App() {
   const [orbComplete, setOrbComplete] = useState(false);
   const [orbDispatched, setOrbDispatched] = useState(false);
 
-  const canGenerate = Boolean(scene && goal && input.trim());
+  const canGenerate = Boolean(scene && input.trim());
   const isTyping = input.trim().length > 0;
   const typingIntensity = Math.min(input.trim().length / 120, 1);
   const glowPhase = loading ? 'processing' : 'receptive';
